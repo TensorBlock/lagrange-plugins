@@ -8195,7 +8195,7 @@ function local(name, command, args, env, found) {
   return { name: slug(name), command, ...args?.length ? { args } : {}, ...Object.keys(env).length ? { env } : {} };
 }
 function remote(name, url, headers, found) {
-  if (/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(new URL(url).host)) found.warnings.push(`MCP server "${name}" is at ${url}, which the cloud can't reach`);
+  if (URL.canParse(url) && /^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(new URL(url).host)) found.warnings.push(`MCP server "${name}" is at ${url}, which the cloud can't reach`);
   let secret;
   for (const [header, value] of headers) {
     if (header.toLowerCase() !== "authorization") {
