@@ -7,14 +7,14 @@ Deploy an agent you built with Codex or Claude Code to LagrangeCloud without lea
 Codex:
 
 ```sh
-codex plugin marketplace add TensorBlock/lagrange-plugins
+codex plugin marketplace add https://github.com/TensorBlock/lagrange-plugins
 codex plugin add lagrange@tensorblock
 ```
 
 Claude Code:
 
 ```sh
-claude plugin marketplace add TensorBlock/lagrange-plugins
+claude plugin marketplace add https://github.com/TensorBlock/lagrange-plugins
 claude plugin install lagrange@tensorblock
 ```
 
