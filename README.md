@@ -28,13 +28,14 @@ Open Codex or Claude Code in your agent's folder and ask it to deploy, for examp
 
 The first time, a browser page opens for you to sign in. Then it:
 
-1. asks which harness to run it on: Lagrange, which learns from its runs and proposes improvements for you to approve, or the Codex or Claude Code you use now,
-2. writes `lgr.yaml` from your folder and shows you what will be uploaded,
-3. asks which of your own MCP servers the agent uses,
-4. stores the keys those servers and scripts need as LagrangeCloud secrets, reading them on your machine without printing them,
-5. deploys and sends the agent a test message,
-6. if the agent is a recurring job, such as a daily review, asks when it should run and sets up the schedule,
-7. gives you the console link.
+1. writes `lgr.yaml` from your folder and shows you what will be uploaded,
+2. asks which of your own MCP servers the agent uses,
+3. stores the keys those servers and scripts need as LagrangeCloud secrets, reading them on your machine without printing them,
+4. deploys and sends the agent a test message,
+5. if the agent is a recurring job, such as a daily review, asks when it should run and sets up the schedule,
+6. gives you the console link.
+
+The agent runs on the same harness you use, Codex or Claude Code. To run it on Lagrange, our harness that learns from the agent's runs and proposes improvements for you to approve, ask for it, for example "Deploy this agent to LagrangeCloud on Lagrange".
 
 After you change the folder, ask again to deploy a new version. The endpoint and keys stay the same.
 

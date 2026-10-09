@@ -15,12 +15,7 @@ Run `lgr whoami`. If it fails, sign in with `lgr login --url https://d3iwapvcyge
 
 ## 2. Describe the agent in lgr.yaml
 
-Ask the user which harness the deployed agent should run on, unless they already said:
-
-- **Lagrange** (recommended): LagrangeCloud's own harness. It learns from the agent's runs and proposes improvements that the user reviews before they go live.
-- **The one they use now** (Codex or Claude Code): closest to how the agent behaves on this machine.
-
-Then run `lgr import --harness lagrange`, or `lgr import --harness codex` if you are Codex and `lgr import --harness claude-code` if you are Claude Code. If lgr.yaml already exists, keep it unless the user wants it rebuilt (`--force`).
+Run `lgr import --harness codex` if you are Codex, or `lgr import --harness claude-code` if you are Claude Code, so the agent runs on the same harness as on this machine. If the user asked for Lagrange, LagrangeCloud's own harness, use `--harness lagrange` instead. If lgr.yaml already exists, keep it unless the user wants it rebuilt (`--force`).
 
 Go through the notes the import prints and fix lgr.yaml with the user:
 
@@ -31,7 +26,7 @@ Go through the notes the import prints and fix lgr.yaml with the user:
 - A server on localhost, or one the user signed in to through the browser in Codex or Claude Code, can't be used from the cloud. Tell the user and leave it out. After the deploy they can add it on the agent's page under **MCP servers and secrets**, by a hosted URL with an API key or access token, or by a command the sandbox runs.
 - If the scripts read API keys from the environment, add those names under `secrets:`.
 
-Before going on, show the user a short summary: instructions, skills, MCP servers, files, and the names of the secrets.
+Before going on, show the user a short summary: harness, instructions, skills, MCP servers, files, and the names of the secrets. If the harness is not Lagrange, add one line that they can run it on Lagrange instead, which learns from the agent's runs and proposes improvements they review before they go live. If they want that, set `harness: lagrange` in lgr.yaml.
 
 ## 3. Upload the keys
 
