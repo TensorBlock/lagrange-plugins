@@ -15,7 +15,12 @@ Run `lgr whoami`. If it fails, sign in with `lgr login --url https://d3iwapvcyge
 
 ## 2. Describe the agent in lgr.yaml
 
-Run `lgr import --harness codex` if you are Codex, or `lgr import --harness claude-code` if you are Claude Code. If lgr.yaml already exists, keep it unless the user wants it rebuilt (`--force`).
+Ask the user which harness the deployed agent should run on, unless they already said:
+
+- **Lagrange** (recommended): LagrangeCloud's own harness. It learns from the agent's runs and proposes improvements that the user reviews before they go live.
+- **The one they use now** (Codex or Claude Code): closest to how the agent behaves on this machine.
+
+Then run `lgr import --harness lagrange`, or `lgr import --harness codex` if you are Codex and `lgr import --harness claude-code` if you are Claude Code. If lgr.yaml already exists, keep it unless the user wants it rebuilt (`--force`).
 
 Go through the notes the import prints and fix lgr.yaml with the user:
 
