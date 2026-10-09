@@ -8826,7 +8826,7 @@ Agent services
   instances agent <name> <agent|none>   Serve an agent on an instance (fleets agent works the same)
   send <instance> <message>  Message the instance's agent and stream the reply (--fleet NAME, --new)
   triggers [create|show|enable|disable|callback|fire|delete] [name]
-                             Webhooks and schedules that message an instance or fleet
+                             Webhooks and schedules that run an agent or message an instance or fleet
   callbacks [secret|rotate|retry <id>]
                              Results sent to callback URLs (--run, --status), and their signing secret
 
@@ -8855,7 +8855,8 @@ Compute options
   --agent NAME[@vN]   serve an agent from launch / create
 
 Trigger options
-  --instance NAME | --fleet NAME     where messages go
+  --agent NAME | --instance NAME | --fleet NAME
+                                     where messages go; an agent gets a new run of its current version each time
   --webhook | --schedule "CRON"      a webhook URL, or a five-field cron schedule in UTC
   --message TEXT                     the message; {{body}} is replaced with a webhook's body
   --body TEXT                        sample body for "triggers fire"
@@ -9456,7 +9457,7 @@ async function triggers(lgr, [sub, name, value], flags) {
   const cols = ["name", "target", "when", "enabled", "last"];
   switch (sub ?? "list") {
     case "list": {
-      const list = await lgr.triggers.list({ instance: flags.instance, fleet: flags.fleet });
+      const list = await lgr.triggers.list({ agent: flags.agent, instance: flags.instance, fleet: flags.fleet });
       print(flags, list, () => table(list.map(row), cols));
       return 0;
     }
@@ -9465,6 +9466,7 @@ async function triggers(lgr, [sub, name, value], flags) {
       const t = await lgr.triggers.create({
         name: need(name, "trigger name"),
         kind: flags.webhook ? "webhook" : "schedule",
+        agent: flags.agent,
         instance: flags.instance,
         fleet: flags.fleet,
         schedule: flags.schedule,

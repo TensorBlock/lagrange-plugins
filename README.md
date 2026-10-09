@@ -31,11 +31,13 @@ The first time, a browser page opens for you to sign in. Then it:
 1. writes `lgr.yaml` from your folder and shows you what will be uploaded,
 2. asks which of your own MCP servers the agent uses,
 3. stores the keys those servers and scripts need as LagrangeCloud secrets, reading them on your machine without printing them,
-4. deploys, sends the agent a test message, and gives you the console link.
+4. deploys and sends the agent a test message,
+5. if the agent is a recurring job, such as a daily review, asks when it should run and sets up the schedule,
+6. gives you the console link.
 
 After you change the folder, ask again to deploy a new version. The endpoint and keys stay the same.
 
-These don't carry over: MCP servers on localhost, MCP servers you signed in to through the browser, and files not listed under `files:` in `lgr.yaml`.
+These don't carry over: MCP servers on localhost, MCP servers you signed in to through the browser, and files not listed under `files:` in `lgr.yaml`. Add servers and keys by hand on the agent's page in the console, under **MCP servers and secrets**.
 
 ## Contents
 

@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: Deploy the agent in the current folder to LagrangeCloud, which runs it in the cloud behind an API endpoint, a Playground and a chat widget. Use when the user wants to deploy, host or publish this agent, put it online, or update a deployed one.
+description: Deploy the agent in the current folder to LagrangeCloud, which runs it in the cloud behind an API endpoint, a Playground and a chat widget. Use when the user wants to deploy, host or publish this agent, put it online, run it on a schedule, or update a deployed one.
 ---
 
 # Deploy this agent to LagrangeCloud
@@ -36,8 +36,16 @@ Run `lgr secrets set NAME1 NAME2 --from-env` with every name under `secrets:`. I
 
 Run `lgr deploy`. If it prints warnings, fix what they point at and deploy again.
 
-Send the deployed agent one message it should be able to handle: `echo "<message>" | lgr chat <name>`. If the reply shows a problem, such as a missing file or a failing tool, fix lgr.yaml and deploy again.
+Send the deployed agent one message it should be able to handle: `echo "<message>" | lgr chat <name>`. If the agent changes things in other systems (merges, posts, sends), make the message ask it to report what it would do without doing it. If the reply shows a problem, such as a missing file or a failing tool, fix lgr.yaml and deploy again.
 
-## 5. Hand over
+## 5. Schedule it, if it is a recurring job
 
-Tell the user in a few lines: the agent's name and version, and the console link from the deploy output, where they can try it in the Playground, add the MCP servers and keys that were left out, create a caller key for their app, and copy a chat widget for a website. To change the agent later, they edit the folder and ask you to deploy again: each deploy is a new version on the same endpoint and keys.
+If the agent is meant to run by itself, such as a daily review or a weekly report (its instructions or the user say so), ask the user when it should run and what each run should be told, then run:
+
+`lgr triggers create <trigger name> --agent <name> --schedule "<cron>" --message "<message>"`
+
+The schedule is five cron fields in UTC: convert the user's local time and tell them the UTC time you used. Each time it fires, the agent's current version runs in a fresh sandbox and is billed like any other run. If the agent changes things in other systems (merges, posts, sends), confirm the message with the user before creating the schedule. Don't fire it now unless the user asks, since a run does the real work.
+
+## 6. Hand over
+
+Tell the user in a few lines: the agent's name and version, any schedule you created, and the console link from the deploy output, where they can try it in the Playground, pause or edit the schedule, add the MCP servers and keys that were left out, create a caller key for their app, and copy a chat widget for a website. To change the agent later, they edit the folder and ask you to deploy again: each deploy is a new version on the same endpoint and keys.
