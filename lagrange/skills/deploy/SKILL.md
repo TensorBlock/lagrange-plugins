@@ -23,7 +23,7 @@ Go through the notes the import prints and fix lgr.yaml with the user:
 - Add the scripts, data and other files the agent uses under `files:`. Only listed files are uploaded. Never list `.env` or other files that hold keys.
 - If the agent uses skills from the user's own skills folder (such as ~/.codex/skills, ~/.agents/skills or ~/.claude/skills), make `skills:` a list of skill folders and add those by full path.
 - A server that runs a command runs inside the cloud sandbox (Linux with Node 22 and Python 3). If the command is a path on this machine, add it to `files:` and point the command at it. `npx -y` packages work as they are; install Python servers under `setup:` with `pip install --user`.
-- A server on localhost, or one the user signed in to through the browser in Codex or Claude Code, can't be used from the cloud. Tell the user and leave it out unless they have a hosted URL and a token for it.
+- A server on localhost, or one the user signed in to through the browser in Codex or Claude Code, can't be used from the cloud. Tell the user and leave it out. After the deploy they can add it on the agent's page under **MCP servers and secrets**, by a hosted URL with an API key or access token, or by a command the sandbox runs.
 - If the scripts read API keys from the environment, add those names under `secrets:`.
 
 Before going on, show the user a short summary: instructions, skills, MCP servers, files, and the names of the secrets.
@@ -40,4 +40,4 @@ Send the deployed agent one message it should be able to handle: `echo "<message
 
 ## 5. Hand over
 
-Tell the user in a few lines: the agent's name and version, and the console link from the deploy output, where they can try it in the Playground, create a caller key for their app, and copy a chat widget for a website. To change the agent later, they edit the folder and ask you to deploy again: each deploy is a new version on the same endpoint and keys.
+Tell the user in a few lines: the agent's name and version, and the console link from the deploy output, where they can try it in the Playground, add the MCP servers and keys that were left out, create a caller key for their app, and copy a chat widget for a website. To change the agent later, they edit the folder and ask you to deploy again: each deploy is a new version on the same endpoint and keys.
