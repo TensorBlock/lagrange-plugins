@@ -1,0 +1,8 @@
+{
+  "name": "lagrange",
+  "version": "0.1.0",
+  "description": "Deploy the agent in your folder to LagrangeCloud as a hosted service.",
+  "author": { "name": "TensorBlock" },
+  "repository": "https://github.com/TensorBlock/lagrange-plugins",
+  "keywords": ["deploy", "agents", "hosting"]
+}

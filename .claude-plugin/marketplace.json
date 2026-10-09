@@ -1,0 +1,12 @@
+{
+  "name": "tensorblock",
+  "owner": { "name": "TensorBlock" },
+  "description": "Plugins for LagrangeCloud.",
+  "plugins": [
+    {
+      "name": "lagrange",
+      "source": "./lagrange",
+      "description": "Deploy the agent in your folder to LagrangeCloud as a hosted service."
+    }
+  ]
+}
