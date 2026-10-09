@@ -11,6 +11,8 @@ codex plugin marketplace add https://github.com/TensorBlock/lagrange-plugins
 codex plugin add lagrange@tensorblock
 ```
 
+If you use the Codex app and have no `codex` command, run the same two lines with `npx -y @openai/codex` in place of `codex`. The app picks up the plugin from the same `~/.codex` folder.
+
 Claude Code:
 
 ```sh
