@@ -8342,12 +8342,14 @@ async function loadSpec(file, opts = {}) {
   if (!raw?.name) throw new Error(`${file}: "name" is required`);
   const { files: _files, ...rest } = raw;
   const spec = { ...rest, instructions: void 0, skills: void 0, mcp_servers: void 0, setup: void 0 };
-  if (raw.instructions) {
-    const looksLikeFile = /^\.{0,2}\//.test(raw.instructions) || /\.mdx?$/.test(raw.instructions);
-    const path = looksLikeFile ? at(raw.instructions, `${file}: instructions`) : "";
-    spec.instructions = looksLikeFile && existsSync(path) ? await readFile(path, "utf8") : raw.instructions;
-    if (looksLikeFile && !existsSync(path)) throw new Error(`${file}: instructions file ${raw.instructions} not found`);
-  }
+  const text = async (value, what) => {
+    const looksLikeFile = /^\.{0,2}\//.test(value) || /\.mdx?$/.test(value);
+    const path = looksLikeFile ? at(value, `${file}: ${what}`) : "";
+    if (looksLikeFile && !existsSync(path)) throw new Error(`${file}: ${what} file ${value} not found`);
+    return looksLikeFile ? await readFile(path, "utf8") : value;
+  };
+  if (raw.instructions) spec.instructions = await text(raw.instructions, "instructions");
+  if (raw.steps) spec.steps = await Promise.all(raw.steps.map(async (s) => ({ ...s, instructions: s.instructions && await text(s.instructions, `step ${s.name} instructions`) })));
   const plan = { skills: [], files: [] };
   if (typeof raw.skills === "string") {
     const dir = at(raw.skills, `${file}: skills`);
@@ -8533,14 +8535,23 @@ var LagrangeCloud = class {
     keys: (ref) => this.request("GET", `/v1/agents/${ref}/keys`).then((r) => r.data),
     createKey: (ref, name) => this.request("POST", `/v1/agents/${ref}/keys`, { name }),
     revokeKey: (ref, keyId) => this.request("DELETE", `/v1/agents/${ref}/keys/${keyId}`),
-    improve: (ref) => this.request("POST", `/v1/agents/${ref}/improvement-jobs`),
-    rollback: (ref, overlayVersion) => this.request("POST", `/v1/agents/${ref}/rollback`, { overlay_version: overlayVersion })
+    /** Looks for an optimization and saves it as a candidate; waits for a workflow audit, which runs in the background, to finish. */
+    improve: async (ref) => {
+      let r = await this.request("POST", `/v1/agents/${ref}/improvement-jobs`);
+      while ("status" in r && r.status === "running") {
+        await new Promise((res) => setTimeout(res, 2e3));
+        r = await this.request("GET", `/v1/agents/${ref}/improvement-jobs/${r.id}`);
+      }
+      return "status" in r ? r.improvement : r;
+    }
   };
   improvements = {
     list: (state) => this.request("GET", `/v1/improvements${query({ state })}`).then((r) => r.data),
     get: (id) => this.request("GET", `/v1/improvements/${id}`),
     promote: (id, traffic = 1) => this.request("POST", `/v1/improvements/${id}/promote`, { traffic }),
-    reject: (id, reason) => this.request("POST", `/v1/improvements/${id}/reject`, { reason })
+    reject: (id, reason) => this.request("POST", `/v1/improvements/${id}/reject`, { reason }),
+    /** Makes the version a promoted candidate was built from live again. */
+    rollback: (id) => this.request("POST", `/v1/improvements/${id}/rollback`)
   };
   profiles = {
     create: (name, config = {}) => this.request("POST", "/v1/profiles", { name, config }),
@@ -8816,6 +8827,7 @@ Agents
   improvements [id]          List improvement candidates, or show one
   promote <improvement>      Promote a candidate (--traffic 0.1 for a canary)
   reject <improvement>       Reject a candidate (--reason)
+  rollback <improvement>     Make the version a promoted candidate replaced live again
 
 Compute
   profiles [create|show|rollback] [name]
@@ -8842,6 +8854,7 @@ Run options
   --repo URL --ref REF               check out a repository first
   --profile NAME [--continue] [--no-persist]   restore and save a frozen profile
   --instance NAME [--continue]       run on a long-lived instance
+  --continue-from RUN_ID             follow up on an earlier run, in its sandbox and conversation
   --fleet NAME                       run on the least busy instance of a fleet
   --approval ask      pause before tool calls that change things
   --callback URL      POST the result to URL when the run finishes (also on send and triggers create)
@@ -8877,6 +8890,7 @@ var OPTIONS = {
   instance: { type: "string" },
   fleet: { type: "string" },
   continue: { type: "boolean" },
+  "continue-from": { type: "string" },
   "no-persist": { type: "boolean" },
   approval: { type: "string" },
   "max-minutes": { type: "string" },
@@ -8955,6 +8969,7 @@ function runInput(task, flags) {
     instance: flags.instance,
     fleet: flags.fleet,
     continue: flags.continue,
+    continue_from: flags["continue-from"],
     persist_profile: flags["no-persist"] ? false : void 0,
     approval: flags.approval,
     workspace: flags.repo ? { repo: flags.repo, ref: flags.ref } : void 0,
@@ -9199,7 +9214,7 @@ ${dim(`follow with: lgr logs ${run.id} --follow`)}`);
     case "agents": {
       const lgr = await client(flags);
       const agents = await lgr.agents.list();
-      print(flags, agents, () => table(agents.map((a) => ({ name: a.name, version: `v${a.current_version}`, overlay: a.overlay_version ? `o${a.overlay_version}` : "-", id: a.id })), ["name", "version", "overlay", "id"]));
+      print(flags, agents, () => table(agents.map((a) => ({ name: a.name, version: `v${a.current_version}`, id: a.id })), ["name", "version", "id"]));
       return 0;
     }
     case "keys": {
@@ -9232,13 +9247,20 @@ ${dim(`follow with: lgr logs ${run.id} --follow`)}`);
       if (args[0]) {
         const imp = await lgr.improvements.get(args[0]);
         print(flags, imp, () => {
-          const m = imp.metrics;
+          const { base, candidate } = imp.metrics;
+          const rate = (x) => x === null ? "-" : `${(x * 100).toFixed(0)}%`;
+          const cost = (x) => x === null ? "-" : usd(x);
+          const secs = (x) => x === null ? "-" : `${x}s`;
           const lines = [
-            `${bold(imp.title)} ${dim(`${imp.id} \xB7 ${imp.state}`)}${imp.placeholder ? yellow(" \xB7 placeholder numbers") : ""}`,
-            `success   ${(m.success_rate[0] * 100).toFixed(0)}% \u2192 ${(m.success_rate[1] * 100).toFixed(0)}%`,
-            `cost/run  ${usd(m.cost_per_run_usd[0])} \u2192 ${usd(m.cost_per_run_usd[1])}`,
-            `p50       ${m.p50_seconds[0]}s \u2192 ${m.p50_seconds[1]}s`,
-            ...imp.checks.map((c) => `${c.status === "pass" ? "\u2713" : c.status === "warn" ? "!" : "\u2717"} ${c.name} ${dim(c.detail)}`)
+            `${bold(imp.title)} ${dim(`${imp.id} \xB7 ${imp.state} \xB7 v${imp.base_version} \u2192 v${imp.candidate_version}`)}`,
+            ...imp.estimate.cost_per_run_usd ? [`estimate  ${usd(imp.estimate.cost_per_run_usd[0])} \u2192 ${usd(imp.estimate.cost_per_run_usd[1])} per run`] : [],
+            ...imp.estimate.failed_calls_per_run ? [`estimate  ${imp.estimate.failed_calls_per_run[0]} \u2192 ${imp.estimate.failed_calls_per_run[1]} failed tool calls per run`] : [],
+            `runs      ${base.runs} \u2192 ${candidate.runs}`,
+            `success   ${rate(base.success_rate)} \u2192 ${rate(candidate.success_rate)}`,
+            `cost/run  ${cost(base.cost_per_run_usd)} \u2192 ${cost(candidate.cost_per_run_usd)}`,
+            `p50       ${secs(base.p50_seconds)} \u2192 ${secs(candidate.p50_seconds)}`,
+            `failed    ${base.failed_calls_per_run ?? "-"} \u2192 ${candidate.failed_calls_per_run ?? "-"} tool calls per run`,
+            ...imp.stopped_reason ? [`stopped   ${imp.stopped_reason}`] : []
           ];
           return lines.join("\n");
         });
@@ -9248,7 +9270,7 @@ ${dim(`follow with: lgr logs ${run.id} --follow`)}`);
       print(
         flags,
         list,
-        () => table(list.map((i) => ({ id: i.id, state: i.state, title: i.title, success: `${(i.metrics.success_rate[0] * 100).toFixed(0)}\u2192${(i.metrics.success_rate[1] * 100).toFixed(0)}%` })), ["id", "state", "success", "title"])
+        () => table(list.map((i) => ({ id: i.id, state: i.state, versions: `v${i.base_version}\u2192v${i.candidate_version}`, title: i.title })), ["id", "state", "versions", "title"])
       );
       return 0;
     }
@@ -9262,6 +9284,12 @@ ${dim(`follow with: lgr logs ${run.id} --follow`)}`);
       const lgr = await client(flags);
       const imp = await lgr.improvements.reject(need(args[0], "improvement id"), flags.reason);
       console.log(`${imp.id} ${imp.state}`);
+      return 0;
+    }
+    case "rollback": {
+      const lgr = await client(flags);
+      const imp = await lgr.improvements.rollback(need(args[0], "improvement id"));
+      console.log(`${imp.id} ${imp.state}; v${imp.base_version} is live`);
       return 0;
     }
     case "profiles":
