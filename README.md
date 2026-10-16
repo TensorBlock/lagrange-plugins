@@ -41,9 +41,13 @@ The agent runs on the same harness you use, Codex or Claude Code. To run it on L
 
 After you change the folder, ask again to deploy a new version. The endpoint and keys stay the same.
 
+## Updates
+
+The deploy steps and the `lgr` command line come from LagrangeCloud each time the plugin runs, so you get new releases without updating the plugin. The plugin itself rarely changes; to update it, run `claude plugin marketplace update tensorblock && claude plugin update lagrange@tensorblock` in Claude Code, or `codex plugin marketplace upgrade tensorblock && codex plugin add lagrange@tensorblock` in Codex.
+
 These don't carry over: MCP servers on localhost, MCP servers you signed in to through the browser, and files not listed under `files:` in `lgr.yaml`. Add servers and keys by hand on the agent's page in the console, under **MCP servers and secrets**.
 
 ## Contents
 
-- `lagrange/skills/deploy/SKILL.md`: the steps Codex or Claude Code follows.
-- `lagrange/skills/deploy/scripts/lgr.mjs`: the LagrangeCloud command line (`lgr`) in one file.
+- `lagrange/skills/deploy/SKILL.md`: tells Codex or Claude Code to run `lgr guide` and follow the steps it prints.
+- `lagrange/skills/deploy/scripts/lgr.mjs`: a launcher that downloads the server's current command line (`lgr`) into `~/.cache/lgr` when it changes, then runs it.
