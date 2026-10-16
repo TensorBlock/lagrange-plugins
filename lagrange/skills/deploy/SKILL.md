@@ -7,11 +7,13 @@ description: Deploy the agent in the current folder to LagrangeCloud, which runs
 
 The agent is what this folder gives you: AGENTS.md or CLAUDE.md, skills, MCP servers, and the scripts and data they use. Deploying uploads it, and LagrangeCloud runs it on Codex or Claude Code in a cloud sandbox.
 
-`lgr` below means `node <this skill's folder>/scripts/lgr.mjs`, which needs Node 22 or later. Run it from the agent's folder. It needs the network, so ask to run it outside the sandbox when the sandbox blocks it.
+Choose the API URL first: use `https://lgr.tensorblock.co` for the public production service unless the user explicitly requests staging or a self-hosted server. State the selected URL before signing in or uploading anything.
+
+`lgr` below means `node <this skill's folder>/scripts/lgr.mjs --url <selected-api-url>`, which needs Node 22 or later. Pass this same explicit `--url` on every command, including `whoami`, `login`, secrets, deploy, chat, and triggers. Do not let a saved CLI URL or `LGR_API_URL` silently select another environment. Run from the agent's folder. It needs the network, so ask to run it outside the sandbox when the sandbox blocks it.
 
 ## 1. Sign in
 
-Run `lgr whoami`. If it fails, sign in with `lgr login --url https://d3iwapvcygehqg.cloudfront.net`. It opens a page in the browser, prints a link and a code, and waits until the user approves. Run it so you can read its output while it waits (in the background, or with a long timeout), give the user the link and the code, and wait for it to finish.
+Run `lgr whoami`. If it fails, sign in with `lgr login` against the selected API URL. It opens a page in the browser, prints a link and a code, and waits until the user approves. Run it so you can read its output while it waits (in the background, or with a long timeout), give the user the link and the code, and wait for it to finish.
 
 ## 2. Describe the agent in lgr.yaml
 
@@ -30,7 +32,7 @@ Before going on, show the user a short summary: harness, instructions, skills, M
 
 ## 3. Upload the keys
 
-Run `lgr secrets set NAME1 NAME2 --from-env` with every name under `secrets:`. It reads each value on this machine (the environment, `.env`, or the MCP config the server came from) and never prints it. Never ask the user to paste a key into the chat. For a name it can't find, ask the user to add it at https://d3iwapvcygehqg.cloudfront.net/console/#settings/secrets, then continue.
+Run `lgr secrets set NAME1 NAME2 --from-env` with every name under `secrets:`. It reads each value on this machine (the environment, `.env`, or the MCP config the server came from) and never prints it. Never ask the user to paste a key into the chat. For a name it can't find, ask the user to add it at `<selected-api-url>/console/#settings/secrets`, then continue.
 
 ## 4. Deploy and try it
 

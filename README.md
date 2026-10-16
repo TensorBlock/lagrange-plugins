@@ -26,6 +26,8 @@ The plugin needs Node 22 or later.
 
 Open Codex or Claude Code in your agent's folder and ask it to deploy, for example "Deploy this agent to LagrangeCloud". In Claude Code you can also run `/lagrange:deploy`.
 
+The plugin uses the production service at https://lgr.tensorblock.co. If you previously used staging, sign in to production when prompted; accounts, credit, and agents are separate between environments. To use staging or a self-hosted server, explicitly request its URL.
+
 The first time, a browser page opens for you to sign in. Then it:
 
 1. writes `lgr.yaml` from your folder and shows you what will be uploaded,
