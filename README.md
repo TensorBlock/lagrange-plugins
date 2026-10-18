@@ -37,7 +37,7 @@ The first time, a browser page opens for you to sign in. Then it:
 5. if the agent is a recurring job, such as a daily review, asks when it should run and sets up the schedule,
 6. gives you the console link.
 
-The agent runs on the same harness you use, Codex or Claude Code. To run it on Lagrange, our harness that learns from the agent's runs and proposes improvements for you to approve, ask for it, for example "Deploy this agent to LagrangeCloud on Lagrange".
+The agent runs on the same harness you use, Codex or Claude Code. Lagrange, our own harness, is coming soon.
 
 After you change the folder, ask again to deploy a new version. The endpoint and keys stay the same.
 
