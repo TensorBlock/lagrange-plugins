@@ -5,7 +5,7 @@ description: Deploy the agent in the current folder to LagrangeCloud, which runs
 
 # Deploy this agent to LagrangeCloud
 
-The agent is what this folder gives you: AGENTS.md or CLAUDE.md, skills, MCP servers, and the scripts and data they use. Deploying uploads it, and LagrangeCloud runs it on Codex or Claude Code in a cloud sandbox.
+The agent is what this folder gives you: AGENTS.md, CLAUDE.md or .hermes.md, skills, MCP servers, and the scripts and data they use. Deploying uploads it, and LagrangeCloud runs it on Codex, Claude Code or Hermes in a cloud sandbox.
 
 Choose the API URL first: use `https://lgr.tensorblock.co` for the public production service unless the user explicitly requests staging or a self-hosted server. State the selected URL before signing in or uploading anything.
 
