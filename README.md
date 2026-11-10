@@ -32,7 +32,7 @@ DeepSeek Harness (`dsh`) reads skills from `~/.agents/skills`; this puts the dep
 curl -fsSL https://lgr.tensorblock.co/cli/install-dsh.sh | sh
 ```
 
-The plugin needs Node 22 or later.
+The plugin needs Node 22 or later. It is tested on macOS and Linux; on Windows, use it inside [WSL](https://learn.microsoft.com/windows/wsl/).
 
 ## Use
 
