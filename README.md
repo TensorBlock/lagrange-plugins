@@ -26,11 +26,10 @@ Hermes installs the plugin's deploy skill straight from this repository:
 hermes skills install TensorBlock/lagrange-plugins/lagrange/skills/deploy
 ```
 
-DeepSeek Harness (`dsh`) reads skills from `~/.agents/skills`, so link the deploy skill there:
+DeepSeek Harness (`dsh`) reads skills from `~/.agents/skills`; this puts the deploy skill there:
 
 ```sh
-git clone --depth 1 https://github.com/TensorBlock/lagrange-plugins ~/.agents/lagrange-plugins
-mkdir -p ~/.agents/skills && ln -s ../lagrange-plugins/lagrange/skills/deploy ~/.agents/skills/lagrange-deploy
+curl -fsSL https://lgr.tensorblock.co/cli/install-dsh.sh | sh
 ```
 
 The plugin needs Node 22 or later.
@@ -56,7 +55,7 @@ After you change the folder, ask again to deploy a new version. The endpoint and
 
 ## Updates
 
-The deploy steps and the `lgr` command line come from LagrangeCloud each time the plugin runs, so you get new releases without updating the plugin. The plugin itself rarely changes; to update it, run `claude plugin marketplace update tensorblock && claude plugin update lagrange@tensorblock` in Claude Code, `codex plugin marketplace upgrade tensorblock && codex plugin add lagrange@tensorblock` in Codex, `hermes skills update` in Hermes, or `git -C ~/.agents/lagrange-plugins pull` for DeepSeek Harness.
+The deploy steps and the `lgr` command line come from LagrangeCloud each time the plugin runs, so you get new releases without updating the plugin. The plugin itself rarely changes; to update it, run `claude plugin marketplace update tensorblock && claude plugin update lagrange@tensorblock` in Claude Code, `codex plugin marketplace upgrade tensorblock && codex plugin add lagrange@tensorblock` in Codex, `hermes skills update` in Hermes, or the install command again for DeepSeek Harness.
 
 These don't carry over: MCP servers on localhost, MCP servers you signed in to through the browser, and files not listed under `files:` in `lgr.yaml`. Add servers and keys by hand on the agent's page in the console, under **MCP servers and secrets**.
 
